@@ -6,7 +6,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({
+      token: "4a4d0d7c13d84255a99fdcf1ad6d49da",
+      application: "error-calculator"
+    });
+  </script>
   <style>
     button {
       margin: 3px;
@@ -88,6 +94,14 @@
   </main>
 
   <script>
+
+    class FormError extends TypeError {
+      constructor(message) {
+        super(message);
+        this.name = "FormError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +109,148 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
+      if (firstNum == '' || secondNum == '') {
+        secondNum = '';
+      }
       output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
-
     // Start your code here
-    // You may move this JS to another file if you wish
+    // You may move this JS to another file if you wish\
+    let timerLabel = 'Timer Button';
+    let countLabel = 'Count Button';
+    let firstNummberContainer;
+    let secondNumberContainer;
+    let operatorContainer;
+    let output;
+    let currentCount = 0;
+    form.addEventListener('change', e => {
+      firstNummberContainer = document.querySelector('#first-num').value;
+      secondNumberContainer = document.querySelector('#second-num').value;
+      operatorContainer = document.querySelector('#operator').value;
+      try {
+        output = eval(`${firstNummberContainer} ${operatorContainer} ${secondNumberContainer}`);
+      } catch (error) {
+        output = undefined;
+      }
+    });
+
+    for (let currentButton = 0; currentButton < errorBtns.length; currentButton++) {
+      errorBtns[currentButton].addEventListener('click', function handleBtnClick() {
+        switch (errorBtns[currentButton].textContent) {
+          case 'Console Log':
+            if (output != undefined && String(firstNummberContainer) != '' && String(secondNumberContainer) != '') {
+              console.log("Expected Value: " + String(output));
+              console.log('Because ' + String(firstNummberContainer) + ' ' + String(operatorContainer) + ' ' + String(secondNumberContainer) + ' = ' + String(output));
+            } else {
+              console.log('The number field containers are not populated with correct integers!');
+            }
+            break;
+          case 'Console Error':
+            try {
+              if (output != undefined && String(firstNummberContainer) != '' && String(secondNumberContainer) != '') {
+                console.log('No errors Found!');
+              } else {
+                throw new FormError('The number field containers are not populated with correct integers!');
+              }
+            } catch (error) {
+              console.error(error);
+            }
+            break;
+          case 'Console Count':
+            currentCount++;
+            console.count(countLabel);
+            break;
+          case 'Console Warn':
+            try {
+              if (output != undefined && String(firstNummberContainer) != '' && String(secondNumberContainer) != '') {
+                console.log('Nothing to warn about!');
+              } else {
+                throw new FormError('The number field containers are not populated with correct integers!');
+              }
+            } catch (error) {
+              console.warn(error);
+            }
+            break;
+          case 'Console Assert':
+            try {
+              const errorMsg = 'The expected output is not the same as the current console count!'
+              if (firstNummberContainer == '' || secondNumberContainer == '') {
+                output = undefined;
+              }
+              if (output == currentCount) {
+                console.log('Nothing to assert, The expected ouput is the same as the console count!');
+              } else {
+                throw (errorMsg);
+              }
+            } catch (error) {
+              if (firstNummberContainer == '' || secondNumberContainer == '') {
+                output = undefined;
+              }
+              console.assert(output == currentCount, { output, error });
+            }
+            break;
+          case 'Console Clear':
+            console.clear();
+            console.countReset(countLabel);
+            currentCount = 0;
+            break;
+          case 'Console Dir':
+            console.dir(errorBtns[currentButton]);
+            break;
+          case 'Console dirxml':
+            console.dirxml(errorBtns[currentButton]);
+            break;
+          case 'Console Group Start':
+            console.group();
+            break;
+          case 'Console Group End':
+            console.groupEnd();
+            break;
+          case 'Console Table':
+            console.table(errorBtns);
+            break;
+          case 'Start Timer':
+            console.time(timerLabel);
+            break;
+          case 'End Timer':
+            console.timeEnd(timerLabel);
+            break;
+          case 'Console Trace':
+            let deep = function () {
+              deeper();
+            }
+            let deeper = function () {
+              deepest();
+            }
+            let deepest = function () {
+              console.trace();
+            }
+            deep();
+            break;
+          case 'Trigger a Global Error':
+            try {
+              if (firstNummberContainer == '' || secondNumberContainer == '') {
+                output = undefined;
+              }
+              if (output == undefined) {
+                throw new FormError('The number field containers are not populated with correct integers!');
+              } else {
+                console.log('No global errors were found!');
+              }
+            } catch (error) {
+              console.log('Sadly, the fields in the form are not filled correctly!');
+              console.error(error);
+            }
+            break;
+        }
+      });
+    }
+    TrackJS.track('Testing TrackJS!');
+    window.onerror = function (message, url, lineNumber) {
+      console.log('JavaScript error: ' + message + ' on line ' + linenumber + ' for ' + url);
+    }
   </script>
 </body>
 
